@@ -8,6 +8,11 @@ use App\Http\Requests\ArticleRequest;
 
 class ArticleController extends Controller
 {
+
+    public function __construct(){
+        $this->authorizeResource(Article::class, 'article');
+    }
+
     //一覧画面表示
     public function index()
     {
@@ -31,4 +36,28 @@ class ArticleController extends Controller
 
         return redirect()->route('articles.index');
     }
+
+    //記事更新画面を表示
+    public function edit(Article $article){
+        return view('articles.edit',['article' => $article]);
+    }
+
+    //記事更新処理
+    public function update(ArticleRequest $request,Article $article){
+        $article->fill($request->all())->save();
+
+        return redirect()->route('articles.index');
+    }
+
+    //記事削除処理
+    public function destroy(Article $article){
+        $article->delete();
+
+        return redirect()->route('articles.index');
+    }
+
+    //詳細画面表示
+    public function show(Article $article){
+        return view('articles.show', ['article' => $article]);
+    } 
 }
