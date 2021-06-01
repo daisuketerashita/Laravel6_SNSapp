@@ -30,4 +30,9 @@ class Article extends Model
             : false;
     }
 
+    //いいね数を算出する
+    public function getCountLikesAttribute(): int{
+        return $this->likes->count();
+    }
+
 }
