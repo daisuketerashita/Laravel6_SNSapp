@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Article;
+use App\Tag;
 use App\Http\Requests\ArticleRequest;
 
 class ArticleController extends Controller
@@ -23,7 +24,11 @@ class ArticleController extends Controller
 
     //記事投稿画面を表示
     public function create(){
-        return view('articles.create');
+        $allTagNames = Tag::all()->map(function ($tag) {
+            return ['text' => $tag->name];
+        });
+
+        return view('articles.create',['allTagNames' => $allTagNames]);
     }
 
     //記事投稿処理
@@ -34,17 +39,38 @@ class ArticleController extends Controller
         $article->user_id = $request->user()->id;
         $article->save();
 
+        //タグの登録
+        $request->tags->each(function ($tagName) use ($article) {
+            $tag = Tag::firstOrCreate(['name' => $tagName]);
+            $article->tags()->attach($tag);
+        });
+
         return redirect()->route('articles.index');
     }
 
     //記事更新画面を表示
     public function edit(Article $article){
-        return view('articles.edit',['article' => $article]);
+        $tagNames = $article->tags->map(function ($tag) {
+            return ['text' => $tag->name];
+        });
+
+        $allTagNames = Tag::all()->map(function ($tag) {
+            return ['text' => $tag->name];
+        });
+
+        return view('articles.edit',['article' => $article,'tagNames' => $tagNames,'allTagNames' => $allTagNames]);
     }
 
     //記事更新処理
     public function update(ArticleRequest $request,Article $article){
         $article->fill($request->all())->save();
+
+        //タグの編集
+        $article->tags()->detach();
+        $request->tags->each(function ($tagName) use ($article) {
+            $tag = Tag::firstOrCreate(['name' => $tagName]);
+            $article->tags()->attach($tag);
+        });
 
         return redirect()->route('articles.index');
     }
