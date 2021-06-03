@@ -35,6 +35,7 @@ class UserController extends Controller
     public function followings(string $name){
         $user = User::where('name', $name)->first();
 
+        //ユーザーのフォロー情報を渡す
         $followings = $user->followings->sortByDesc('created_at');
 
         return view('users.followings', [
@@ -47,6 +48,7 @@ class UserController extends Controller
     public function followers(string $name){
         $user = User::where('name', $name)->first();
 
+        //ユーザーのフォロワー情報を渡す
         $followers = $user->followers->sortByDesc('created_at');
 
         return view('users.followers', [
